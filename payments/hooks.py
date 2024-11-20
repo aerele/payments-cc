@@ -26,6 +26,8 @@ app_license = "MIT"
 # webform_include_css = {"doctype": "public/css/doctype.css"}
 
 # include js in page
+doctype_js = {"Payment Request" : "public/js/payment_request.js"}
+
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
@@ -94,7 +96,10 @@ before_uninstall = "payments.utils.delete_custom_fields"
 # ---------------
 # Override standard doctype classes
 
-override_doctype_class = {"Web Form": "payments.overrides.payment_webform.PaymentWebForm"}
+override_doctype_class = {
+	"Web Form": "payments.overrides.payment_webform.PaymentWebForm",
+	"Payment Request": "payments.overrides.payment_request.CustomPaymentRequest"
+}
 
 # Document Events
 # ---------------

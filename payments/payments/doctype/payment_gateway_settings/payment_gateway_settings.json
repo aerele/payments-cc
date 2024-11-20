@@ -1,0 +1,41 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-11-18 10:13:05.290428",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "default_gateways"
+ ],
+ "fields": [
+  {
+   "fieldname": "default_gateways",
+   "fieldtype": "Table",
+   "label": "Default Gateway Accounts",
+   "options": "Default Gateway Account"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2024-11-20 14:00:14.896452",
+ "modified_by": "Administrator",
+ "module": "Payments",
+ "name": "Payment Gateway Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

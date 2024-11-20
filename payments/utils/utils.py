@@ -137,7 +137,7 @@ def make_custom_fields():
 						"options": "Currency",
 						"insert_after": "amount",
 					},
-				]
+				],
 			}
 		)
 
@@ -159,6 +159,37 @@ def make_custom_fields():
 		}
 
 		create_custom_fields(custom_fields)
+
+	create_default_gateway_account_fields()
+
+def create_default_gateway_account_fields():
+	create_custom_fields(
+		{
+			"Payment Request": [
+				{
+					"fieldname": "payment_page_details",
+					"fieldtype": "Section Break",
+					"label": "Payment Page Details",
+					"insert_after": "make_sales_invoice",
+				},
+				{
+					"fieldname": "show_payments_page",
+					"fieldtype": "Check",
+					"label": "Show payments page",
+					"insert_after": "payment_page_details",
+				},
+				{
+					"depends_on": "show_payments_page",
+					"fieldname": "default_gateway_accounts",
+					"fieldtype": "Table",
+					"label": "Default Gateway Accounts",
+					"options": "Default Gateway Account",
+					"insert_after": "show_payments_page",
+				}
+			]
+		}
+	)
+	frappe.clear_cache(doctype="Payment Request")
 
 
 def delete_custom_fields():

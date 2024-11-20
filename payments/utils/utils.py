@@ -163,6 +163,7 @@ def make_custom_fields():
 	create_default_gateway_account_fields()
 
 def create_default_gateway_account_fields():
+	click.secho("*Installing Payment Custom Fields in Payment Request")
 	create_custom_fields(
 		{
 			"Payment Request": [
@@ -191,6 +192,19 @@ def create_default_gateway_account_fields():
 	)
 	frappe.clear_cache(doctype="Payment Request")
 
+def delete_default_gateway_account_fields():
+	if frappe.get_meta("Payment Request").has_field("default_gateway_accounts"):
+		click.secho("* Uninstalling Payment Gateway Account Custom Fields from Payment Request")
+
+		fieldnames = (
+			"payment_page_details",
+			"show_payments_page",
+			"default_gateway_accounts",
+		)
+		for fieldname in fieldnames:
+			frappe.db.delete("Custom Field", {"name": "Payment Request-" + fieldname})
+
+		frappe.clear_cache(doctype="Payment Request")
 
 def delete_custom_fields():
 	if frappe.get_meta("Web Form").has_field("payments_tab"):
@@ -213,6 +227,8 @@ def delete_custom_fields():
 			frappe.db.delete("Custom Field", {"name": "Web Form-" + fieldname})
 
 		frappe.clear_cache(doctype="Web Form")
+
+		delete_default_gateway_account_fields()
 
 
 def before_install():

@@ -6,6 +6,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "company",
   "gateway_settings",
   "payment_gateway",
   "payment_gateway_account",
@@ -24,7 +25,8 @@
   {
    "fieldname": "payment_url",
    "fieldtype": "Text",
-   "label": "Payment URL"
+   "label": "Payment URL",
+   "read_only": 1
   },
   {
    "fieldname": "gateway_settings",
@@ -48,12 +50,20 @@
    "fieldtype": "Data",
    "label": "Icon",
    "options": "URL"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-11-20 09:39:44.613402",
+ "modified": "2024-11-21 18:04:54.172085",
  "modified_by": "Administrator",
  "module": "Payments",
  "name": "Default Gateway Account",

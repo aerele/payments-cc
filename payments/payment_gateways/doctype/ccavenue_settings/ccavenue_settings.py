@@ -44,6 +44,7 @@ class CCAvenueSettings(Document):
 		)
 
 	def get_payment_url(self, **kwargs):
+		frappe.log_error("data: ", kwargs)
 		self.order_id = create_request_log(kwargs, service_name="CCAvenue", name=kwargs.get("order_id", "")).name
 		return get_url(f"ccavenue_checkout?order_id={self.order_id}")
 	

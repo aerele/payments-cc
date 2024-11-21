@@ -3,8 +3,11 @@
 
 frappe.ui.form.on("Payment Gateway Settings", {
     refresh(frm){
+        frm.trigger("update_query_filters")
+    },
+
+    update_query_filters(frm){
         frm.set_query("gateway_settings", "default_gateways", (frm, cdt, cdn)=>{
-            // let exists = frm.doc.default_gateways.map((a)=>{return a.gateway_settings})
             return {
                 filters: {
                     "module": "Payment Gateways",
@@ -26,30 +29,17 @@ frappe.ui.form.on("Payment Gateway Settings", {
             let row = locals[cdt][cdn]
             return {
                 filters: {
-                    "payment_gateway": row.payment_gateway
+                    "payment_gateway": row.payment_gateway,
+                    "company": row.company
                 }
             }
         })
-
-        // frm.doc.default_gateways?.forEach(row => {
-        //     if(!row.single){
-        //         this.update_payemnt_gateway(frm, row.payment_gateway, row.doctype, row.name)
-        //     }
-        // });
     },
 
     validate(frm){
         if(frm.doc.gateway_mode == "Default"){
             cur_frm.clear_table("default_gateways")
         }
-
-        // frm.doc.default_gateways?.forEach(row => {
-        //     if(!row.default_gateway){
-        //         let message = __("Mandatory fields required in table Default Gateways, Row {0}", [row.idx])
-        //         message += "<br><br><ul><li>Default Gateway</li></ul>"
-        //         frappe.throw({ message: message, title: __("Missing Fields"), });
-        //     }
-        // });
     },
 });
 

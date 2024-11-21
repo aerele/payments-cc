@@ -113,6 +113,14 @@ override_doctype_class = {
 # 	}
 # }
 
+#Update Payment Gateway Account name with company abbr
+doc_events = {
+	"Payment Gateway Account": {
+		"autoname": "payments.payments.doctype.payment_gateway_settings.payment_gateway_settings.create_payment_gateway_name",
+		"validate": "payments.payments.doctype.payment_gateway_settings.payment_gateway_settings.validate_payment_gateway_account"
+	}
+}
+
 # Scheduled Tasks
 # ---------------
 

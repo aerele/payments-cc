@@ -5,6 +5,7 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "show_url_in_draft_state",
   "default_gateways"
  ],
  "fields": [
@@ -13,12 +14,18 @@
    "fieldtype": "Table",
    "label": "Default Gateway Accounts",
    "options": "Default Gateway Account"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_url_in_draft_state",
+   "fieldtype": "Check",
+   "label": "Show URL In Draft State"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-11-20 14:00:14.896452",
+ "modified": "2024-11-21 19:47:39.074109",
  "modified_by": "Administrator",
  "module": "Payments",
  "name": "Payment Gateway Settings",

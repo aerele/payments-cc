@@ -163,7 +163,6 @@ def make_custom_fields():
 	create_default_gateway_account_fields()
 
 def create_default_gateway_account_fields():
-	click.secho("*Installing Payment Custom Fields in Payment Request")
 	create_custom_fields(
 		{
 			"Payment Request": [
@@ -186,6 +185,20 @@ def create_default_gateway_account_fields():
 					"label": "Default Gateway Accounts",
 					"options": "Default Gateway Account",
 					"insert_after": "show_payments_page",
+				}
+			]
+		}
+	)
+	create_custom_fields(
+		{
+			"Payment Gateway Account": [
+				{
+					"fieldname": "company",
+					"fieldtype": "Link",
+					"options": "Company",
+					"label": "Company",
+					"insert_after": "payment_gateway",
+					"read_only_depends_on": "eval: !doc.__islocal"
 				}
 			]
 		}

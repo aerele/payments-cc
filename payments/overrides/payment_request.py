@@ -16,6 +16,7 @@ class CustomPaymentRequest(PaymentRequest):
 			self.payment_account = ""
 			self.payment_channel = ""
 			if frappe.get_doc("Payment Gateway Settings").show_url_in_draft_state:
+				self.default_gateway_accounts = []
 				self.set_payment_page_url()
 		else:
 			self.payment_gateway_account = frappe.get_value(

@@ -97,9 +97,7 @@ let makePaymentDialog = (frm) => {
                             },
                             callback: function (res) {
                                     if (res.message) {
-                                        console.log(res.message);
-                                        
-                                            window.open(res.message, '_blank', 'width=800,height=600')
+                                        window.open(res.message, '_blank', 'width=800,height=600')
                                     }
                             },
                     });

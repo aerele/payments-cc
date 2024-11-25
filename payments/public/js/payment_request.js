@@ -9,5 +9,11 @@ frappe.ui.form.on('Payment Request', {
 				}
 			}
 		})
+		if(frm.doc.status != "Paid" && frm.doc.transaction_status){
+			frm.dashboard.add_comment(frm.doc.transaction_status, "red", true)
+		}
+		else if(frm.doc.status == "Paid"){
+			frm.dashboard.add_comment(frm.doc.transaction_status, "green", true)
+		}
 	}
 })

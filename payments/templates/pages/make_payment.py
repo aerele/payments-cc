@@ -32,7 +32,7 @@ def get_payment_details(order_id):
 		)
 		.where(
 			(doc.name == order_id) & (doc.show_payments_page == 1) &
-			(doc.status.notin(["Paid", "Failed", "Cancelled"])) &
+			(doc.status.notin(["Paid", "Cancelled"])) &
 			(doc.docstatus == 1)
 		)
   		.orderby(c_doc.idx)

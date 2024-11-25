@@ -60,8 +60,7 @@ class CustomPaymentRequest(PaymentRequest):
 
 	def set_as_failed(self):
 		self.db_set("status", "Failed")
-		if self.docstatus == 1:
-			self.db_set("docstatus", 2)
+		self.db_set("transaction_status", "Payment Not Completed")
 
 
 	def get_payment_url(self, payment_gateway= None):

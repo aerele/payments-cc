@@ -185,6 +185,13 @@ def create_default_gateway_account_fields():
 					"label": "Default Gateway Accounts",
 					"options": "Default Gateway Account",
 					"insert_after": "show_payments_page",
+				},
+				{
+					"fieldname": "transaction_status",
+					"fieldtype": "Text",
+					"label": "Transaction Status",
+					"insert_after": "party_account_currency",
+					"read_only": 1
 				}
 			]
 		}

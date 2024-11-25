@@ -13,8 +13,6 @@ $(document).ready(function() {
             }
 		},
 		callback: function(r) {
-			console.log(r);
-			
 			if (r.message) {
 				window.location.href = r.message.payment_url
 			}

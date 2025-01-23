@@ -129,7 +129,7 @@ class BankMuscatSettings(Document):
 		iframe = """
 		<iframe  
 			width="482" height="500" scrolling="No" frameborder="0"  id="paymentFrame"
-			src="https://www.hospitalshop.com/transaction.do?command=initiateTransaction&encReq=$encReq&xscode=$xscode">
+			src="https://mti.bankmuscat.com:6443/transaction.do?command=initiateTransaction&encReq=$encReq&xscode=$xscode">
 	  	</iframe>
 		"""
 

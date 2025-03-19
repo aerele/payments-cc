@@ -1,0 +1,63 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:merchant_id",
+ "creation": "2024-11-09 10:03:37.455657",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "use_sandbox",
+  "merchant_id",
+  "access_code",
+  "working_key"
+ ],
+ "fields": [
+  {
+   "fieldname": "merchant_id",
+   "fieldtype": "Data",
+   "label": "Merchant ID",
+   "unique": 1
+  },
+  {
+   "fieldname": "access_code",
+   "fieldtype": "Password",
+   "label": "Access Code"
+  },
+  {
+   "fieldname": "working_key",
+   "fieldtype": "Password",
+   "label": "Working Key"
+  },
+  {
+   "default": "0",
+   "fieldname": "use_sandbox",
+   "fieldtype": "Check",
+   "label": "Sandbox"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-11-19 19:08:29.576990",
+ "modified_by": "Administrator",
+ "module": "Payment Gateways",
+ "name": "CCAvenue Settings",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

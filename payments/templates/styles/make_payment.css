@@ -1,0 +1,334 @@
+
+/* Basic styling reset */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+/* Centering the form on the page */
+.payment-form-container {
+    width: 100%;
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #f7f7f7;
+    border-radius: 8px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+/* Title styling */
+
+.payment-title {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;  /* Ensures <h2> is centered */
+}
+
+/* Form styling */
+.payment-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Form group styling */
+.form-group {
+    width: 100%;
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.form-group label {
+    font-weight: bold;
+    color: #555;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+/* Button group styling */
+.button-group {
+    flex-wrap: wrap;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 20px;
+}
+
+/* Payment button styling */
+.payment-button {
+    flex: 1;
+    padding: 12px 15px;
+    font-size: 14px;
+    font-weight: bold;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 0 5px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.payment-button.ccavenue {
+    background-color: #326dc2;
+}
+
+.payment-button.paytm {
+    background-color: #00b4f6;
+}
+
+.payment-button.braintree {
+    background-color: #040836
+}
+
+
+.payment-button.razorpay {
+    background-color: #ff6f00;
+}
+
+.payment-button.stripe {
+    background-color: #6772e5;
+}
+
+.payment-button:hover:not(:disabled) {
+    transform: scale(1.05);
+}
+
+.payment-button:disabled {
+    background-color: #ddd;
+    cursor: not-allowed;
+}
+
+.payment-button.ccavenue:hover {
+    background-color: #0056b3;
+}
+
+.payment-button.razorpay:hover {
+    background-color: #e65100;
+}
+
+.payment-button.stripe:hover {
+    background-color: #5469d4;
+}
+/* Styling for the error message container */
+.error-message-container {
+    max-width: 500px;
+    margin: 50px auto;
+    padding: 20px;
+    border: 2px solid #ff4d4d;
+    border-radius: 10px;
+    background-color: #fff3f3;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    font-family: Arial, sans-serif;
+}
+
+/* Title styling */
+.error-title {
+    font-size: 1.8rem;
+    color: #ff3333;
+    margin-bottom: 10px;
+}
+
+/* Description styling */
+.error-description {
+    font-size: 1.2rem;
+    color: #444;
+    margin-bottom: 15px;
+}
+
+/* Highlighted Order ID */
+.order-id {
+    font-weight: bold;
+    color: #d93636;
+    background-color: #ffeaea;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+/* Container for all payment options */
+#button-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    padding: 1rem;
+}
+
+/* Individual payment card styling */
+.payment-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.5rem;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-align: center;
+}
+
+.payment-card:hover:not(.disabled) {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+
+.payment-card.disabled {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Card content */
+.card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 1rem;
+    gap: 1rem;
+}
+
+/* Payment icon */
+.card-icon {
+    width: 100px;
+    height: 25px;
+}
+
+/* Payment label */
+.card-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+/* Payment button */
+.card-button {
+    padding: 0.5rem 1rem;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    position: relative;
+    bottom: 10px;
+}
+
+.card-button:hover {
+    background-color: #0056b3;
+}
+
+.card-button:disabled {
+    background-color: #cccccc;
+    color: #666666;
+    cursor: not-allowed;
+}
+
+/* Style for the entire card */
+.payment-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.5rem;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    gap: 1rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.payment-card:hover:not(.disabled) {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+
+.payment-card.disabled {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Header section styling */
+.card-header {
+    background-color: #f8f9fa;
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 8px 8px 0 0;
+    text-align: center;
+}
+
+.payment-title {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #333;
+}
+
+/* Content section styling */
+.card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    object-fit: contain;
+}
+
+/* Payment icon */
+.card-icon {
+    width: fit-content;
+    height:fit-content;
+}
+
+/* Payment button */
+.card-button {
+    padding: 0.5rem 1rem;
+    margin-top: 1rem;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.card-button:hover {
+    background-color: #0056b3;
+}
+
+.img-container{
+    width: 80%;
+    height: 80%;
+}
+
+.card-button {
+    background-color: #007bff;
+    color: #ffffff;
+    border: 1px solid #007bff;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+
+.card-button:disabled {
+    background-color: #D6E4FF;
+    color: #0056b3;
+    border: 1px solid #B0C9E8;
+    cursor: not-allowed;
+    font-weight: bold;
+    opacity: 0.9;
+  }

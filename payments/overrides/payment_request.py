@@ -1,16 +1,17 @@
 import frappe
 from erpnext.accounts.doctype.payment_request.payment_request import (
-	PaymentRequest, get_gateway_details, _get_payment_gateway_controller
+	PaymentRequest,
+	_get_payment_gateway_controller,
+	get_gateway_details,
 )
+from frappe import _, bold
 from frappe.utils import flt
-from frappe import _
-from frappe import bold
 
 
 class CustomPaymentRequest(PaymentRequest):
 	def validate(self):
 		if self.show_payments_page:
-			#clear payment gateway details
+			# clear payment gateway details
 			self.payment_gateway_account = ""
 			self.payment_gateway = ""
 			self.payment_account = ""
@@ -20,19 +21,24 @@ class CustomPaymentRequest(PaymentRequest):
 				self.set_payment_page_url()
 		else:
 			self.payment_gateway_account = frappe.get_value(
-				"Payment Gateway Account",
-				{"is_default": 1, "company": self.company},
-				"name"
+				"Payment Gateway Account", {"is_default": 1, "company": self.company}, "name"
 			)
 		super().validate()
 		self.validate_payment_gateway_account()
 
 	def validate_payment_gateway_account(self):
 		if self.payment_gateway_account:
-			if self.company != frappe.get_value("Payment Gateway Account", self.payment_gateway_account, "company"):
-				frappe.throw(_(f"Payment Gateway Account({bold(self.payment_gateway_account)}) does not belong to the company {bold(self.company)}"))
+			if self.company != frappe.get_value(
+				"Payment Gateway Account", self.payment_gateway_account, "company"
+			):
+				frappe.throw(
+					_(
+						f"Payment Gateway Account({bold(self.payment_gateway_account)}) does not belong to the company {bold(self.company)}"
+					)
+				)
 
 	def on_submit(self):
+		self.db_set("custom_name", self.name.replace("-", ""))
 		if self.payment_request_type == "Outward":
 			self.db_set("status", "Initiated")
 			return
@@ -53,18 +59,14 @@ class CustomPaymentRequest(PaymentRequest):
 		gateways = frappe.get_doc("Payment Gateway Settings").get_default_gateways(self.company)
 		for gateway in gateways:
 			payment_url = self.get_payment_url(gateway.get("payment_gateway"))
-			gateway.update({
-				"payment_url": payment_url
-			})
+			gateway.update({"payment_url": payment_url})
 			self.append("default_gateway_accounts", gateway)
 
 	def set_as_failed(self):
 		self.db_set("status", "Failed")
 		self.db_set("transaction_status", "Payment Not Completed")
 
-
-	def get_payment_url(self, payment_gateway= None):
-
+	def get_payment_url(self, payment_gateway=None):
 		if not self.show_payments_page:
 			return super().get_payment_url()
 
@@ -78,7 +80,8 @@ class CustomPaymentRequest(PaymentRequest):
 			)
 			data.update({"company": frappe.defaults.get_defaults().company})
 
-		if not payment_gateway: return
+		if not payment_gateway:
+			return
 
 		controller = _get_payment_gateway_controller(payment_gateway)
 		controller.validate_transaction_currency(self.currency)
@@ -101,6 +104,4 @@ class CustomPaymentRequest(PaymentRequest):
 				}
 			)
 		else:
-			frappe.log_error(
-				f"Payment Page URL Option Not Implemented in {controller.name}"
-			)
+			frappe.log_error(f"Payment Page URL Option Not Implemented in {controller.name}")

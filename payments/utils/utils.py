@@ -143,6 +143,77 @@ def make_custom_fields():
 
 		frappe.clear_cache(doctype="Web Form")
 
+	if not frappe.get_meta("Integration Request").has_field("url_access_time"):
+		click.secho("* Installing URL Access Time Custom Field in Integration Request")
+
+		create_custom_fields(
+			{
+				"Integration Request": [
+					{
+						"fieldname": "url_access_time",
+						"fieldtype": "Datetime",
+						"label": "Payment URL Access Time",
+						"insert_after": "status",
+						"read_only": 1,
+					}
+				]
+			}
+		)
+
+		frappe.clear_cache(doctype="Integration Request")
+
+	if not frappe.get_meta("Payment Request").has_field("custom_name"):
+		click.secho("* Installing Payment Custom Fields in Payment Request")
+		create_custom_fields(
+			{
+				"Payment Request": [
+					{
+						"fieldname": "custom_name",
+						"fieldtype": "Data",
+						"label": "Name",
+						"insert_after": "mode_of_payment",
+						"read_only": 1,
+					},
+					{
+						"fieldname": "response_command",
+						"fieldtype": "Small Text",
+						"label": "Response Command",
+						"insert_after": "custom_name",
+						"read_only": 1,
+					},
+					{
+						"fieldname": "custom_payment_reference_no",
+						"fieldtype": "Data",
+						"label": "Payment Reference No",
+						"insert_after": "failed_reason",
+						"read_only": 1,
+					},
+					{
+						"fieldname": "bank_reference_no",
+						"fieldtype": "Data",
+						"label": "Bank Reference No",
+						"insert_after": "custom_payment_reference_no",
+						"read_only": 1,
+					},
+					{
+						"fieldname": "transaction_status",
+						"fieldtype": "Data",
+						"label": "Transaction status",
+						"insert_after": "party_account_currency",
+						"read_only": 1
+					},
+					{
+						"fieldname": "payment_entry",
+						"fieldtype": "Data",
+						"label": "Payment Entry",
+						"insert_after": "bank_reference_no",
+						"read_only": 1	
+					}
+				]
+			}
+		)
+		frappe.clear_cache(doctype="Payment Request")
+
 	if "erpnext" in frappe.get_installed_apps():
 		custom_fields = {
 			"GoCardless Mandate": [
@@ -162,34 +233,68 @@ def make_custom_fields():
 
 
 def delete_custom_fields():
-	if not frappe.get_meta("Web Form").has_field("payments_tab"):
-		return
-
-	click.secho("* Uninstalling Payment Custom Fields from Web Form")
-	frappe.db.delete(
-		"Custom Field",
-		{
-			"dt": "Web Form",
-			"fieldname": (
-				"in",
-				(
-					"payments_tab",
-					"accept_payment",
-					"payment_gateway",
-					"payment_button_label",
-					"payment_button_help",
-					"payments_cb",
-					"amount_field",
-					"amount_based_on_field",
-					"amount",
-					"currency",
+	if frappe.get_meta("Web Form").has_field("payments_tab"):
+		click.secho("* Uninstalling Payment Custom Fields from Web Form")
+		frappe.db.delete(
+			"Custom Field",
+			{
+				"dt": "Web Form",
+				"fieldname": (
+					"in",
+					(
+						"payments_tab",
+						"accept_payment",
+						"payment_gateway",
+						"payment_button_label",
+						"payment_button_help",
+						"payments_cb",
+						"amount_field",
+						"amount_based_on_field",
+						"amount",
+						"currency",
+					),
 				),
-			),
-		},
-	)
+			},
+		)
 
-	frappe.clear_cache(doctype="Web Form")
+		frappe.clear_cache(doctype="Web Form")
 
+	if frappe.get_meta("Payment Request").has_field("custom_name"):
+		click.secho("* Uninstalling Payment Custom Fields from Payment Request")
+		frappe.db.delete(
+			"Custom Field",
+			{
+				"dt": "Payment Request",
+				"fieldname": (
+					"in",
+					(
+						"custom_name",
+						"response_command",
+						"custom_payment_reference_no",
+						"bank_reference_no",
+						"transaction_status",
+						"payment_entry",
+					),
+				),
+			},
+		)
+
+		frappe.clear_cache(doctype="Payment Request")
+
+	if frappe.get_meta("Integration Request").has_field("url_access_time"):
+		click.secho("* Uninstalling Integration Request Custom Fields")
+		frappe.db.delete(
+			"Custom Field",
+			{
+				"dt": "Integration Request",
+				"fieldname": (
+					"in",
+					("url_access_time",),
+				),
+			},
+		)
+
+		frappe.clear_cache(doctype="Integration Request")
 
 def before_install():
 	# TODO: remove this

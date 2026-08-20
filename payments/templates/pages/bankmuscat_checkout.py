@@ -1,14 +1,17 @@
 import json
+from urllib.parse import parse_qsl, urlencode
+
 import frappe
 import requests
 from frappe import _
-from urllib.parse import parse_qsl, urlencode
-from frappe.utils import flt, get_url, getdate
 from frappe.integrations.utils import create_request_log
+from frappe.utils import flt, get_url, getdate
+
 from payments.payment_gateways.doctype.bankmuscat_settings.bankmuscat_settings import (
 	BankMuscatSettings as BankMuscat,
-	get_gateway_controller
 )
+from payments.payment_gateways.doctype.bankmuscat_settings.bankmuscat_settings import get_gateway_controller
+
 
 # Check if any previously created Integration Request has status = "Completed";
 # if yes, return the payment success page URL
@@ -17,17 +20,18 @@ def check_already_payment_processed(request, reference_doctype, reference_docnam
 	if status != "Completed":
 		return None
 
-	params = urlencode({
-		"doctype": reference_doctype,
-		"docname": reference_docname
-	})
+	params = urlencode({"doctype": reference_doctype, "docname": reference_docname})
 	redirect_url = f"payment-success?{params}"
 
-	return {"payment_url": get_url(redirect_url)}	
+	return {"payment_url": get_url(redirect_url)}
+
 
 # Fetch and return the Bank Muscat payment URL for a valid Integration Request.
-@frappe.whitelist(allow_guest=True)
-def get_payment_url(data=None):
+# Guest access is required: the hosted payment page is opened by anonymous
+# shoppers from the storefront checkout; the method only reads the Integration
+# Request keyed by order_id and never mutates data.
+@frappe.whitelist(allow_guest=True)  # nosemgrep: guest-whitelisted-method
+def get_payment_url(data: dict | None = None):
 	try:
 		if isinstance(data, str):
 			data = frappe.parse_json(data or "{}")
@@ -44,23 +48,20 @@ def get_payment_url(data=None):
 
 		order_data = frappe.db.get_value("Integration Request", integration_request, "data")
 		if not order_data:
-			frappe.throw(
-				_("Integration Request data is missing."),
-				title=_("Payment Failed")
-			)
+			frappe.throw(_("Integration Request data is missing."), title=_("Payment Failed"))
 
 		order_details = frappe._dict(frappe.parse_json(order_data))
 
-		condition, msg, status = check_url_usage_status(data.order_id) 
+		condition, msg, status = check_url_usage_status(data.order_id)
 
 		if condition:
 			if status == "pending":
 				return {"msg": msg, "url": get_url("/payment-failed")}
-			if status == "completed":	
+			if status == "completed":
 				return {"msg": msg, "url": get_url("/payment-success")}
-		
+
 		reference_doctype = order_details.get("reference_doctype")
-	
+
 		reference_docname = order_details.get("reference_docname")
 
 		redirect_url = check_already_payment_processed(
@@ -71,32 +72,22 @@ def get_payment_url(data=None):
 			return redirect_url
 
 		if not (reference_doctype and reference_docname):
-			frappe.throw(
-				_("Reference document details are missing."),
-				title=_("Invalid Request")
-			)
+			frappe.throw(_("Reference document details are missing."), title=_("Invalid Request"))
 
 		payment_gateway = frappe.db.get_value(reference_doctype, reference_docname, "payment_gateway")
 		if not payment_gateway:
-			frappe.throw(
-				_("Payment Gateway not linked to this transaction."),
-				title=_("Payment Failed")
-			)
+			frappe.throw(_("Payment Gateway not linked to this transaction."), title=_("Payment Failed"))
 
 		gateway_controller = get_gateway_controller(reference_doctype, reference_docname, payment_gateway)
 		if not gateway_controller:
-			frappe.throw(
-				_("Unable to identify payment gateway controller."),
-				title=_("Payment Failed")
-			)
+			frappe.throw(_("Unable to identify payment gateway controller."), title=_("Payment Failed"))
 
 		gateway_doc = frappe.get_doc("BankMuscat Settings", gateway_controller)
 
 		payment_url = gateway_doc.get_payment_page_url(**order_details)
 		if not payment_url:
 			frappe.throw(
-				_("Unable to generate payment URL. Please try again later."),
-				title=_("Payment Failed")
+				_("Unable to generate payment URL. Please try again later."), title=_("Payment Failed")
 			)
 
 		return {"payment_url": payment_url}
@@ -106,7 +97,10 @@ def get_payment_url(data=None):
 			title="BankMuscat: Payment URL Generation Failed",
 			message=frappe.get_traceback(with_context=True),
 		)
-		frappe.throw(e.message)
+		if hasattr(e, "msg"):
+			frappe.throw(e.msg)
+		frappe.throw(str(e))
+
 
 # Route the UI page based on the response
 def handle_payment_response(data_dict, reference_doctype, reference_docname):
@@ -122,11 +116,13 @@ def handle_payment_response(data_dict, reference_doctype, reference_docname):
 
 	# Save tracking ID if not already saved
 	if payment_request.status == "Initiated" and not payment_request.custom_payment_reference_no:
-		payment_request.db_set({
-			"transaction_date": getdate(data.get("trans_date")),
-			"custom_payment_reference_no": data.get("tracking_id"),
-			"bank_reference_no": data.get("bank_ref_no")
-		})
+		payment_request.db_set(
+			{
+				"transaction_date": getdate(data.get("trans_date")),
+				"custom_payment_reference_no": data.get("tracking_id"),
+				"bank_reference_no": data.get("bank_ref_no"),
+			}
+		)
 
 	order_status = data.get("order_status", "").lower()
 
@@ -142,7 +138,7 @@ def handle_payment_response(data_dict, reference_doctype, reference_docname):
 				amount=data.get("amount"),
 				payment_ref_no=data.get("tracking_id"),
 				bank_ref_no=data.get("bank_ref_no"),
-				payment_date=data.get("trans_date")
+				payment_date=data.get("trans_date"),
 			)
 
 			frappe.db.set_value(
@@ -152,7 +148,7 @@ def handle_payment_response(data_dict, reference_doctype, reference_docname):
 					"status": "Paid",
 					"transaction_status": "The payment has been completed",
 					"response_command": msg,
-				}
+				},
 			)
 			# payment_entry = payment_request.set_as_paid()
 			# payment_request.db_set("transaction_status", "The payment has been completed")
@@ -172,7 +168,7 @@ def handle_payment_response(data_dict, reference_doctype, reference_docname):
 			frappe.cache().set_value(
 				f"payment_success:{token}",
 				{"doctype": reference_doctype, "docname": reference_docname},
-				expires_in_sec=300
+				expires_in_sec=300,
 			)
 
 			return redirect_response(f"payment-success?token={token}")
@@ -210,6 +206,7 @@ def handle_payment_response(data_dict, reference_doctype, reference_docname):
 
 	except Exception:
 		frappe.log_error("Error while processing payment response", frappe.get_traceback())
+
 
 # Update the Payment Request and Payment Entry based on the response
 def handle_payment_page_response(
@@ -296,6 +293,7 @@ def handle_payment_page_response(
 			redirect_url = "payment-failed"
 			frappe.local.response["type"] = "redirect"
 			frappe.local.response["location"] = get_url(redirect_url)
+
 
 # Validate response data
 @frappe.whitelist(allow_guest=True)
@@ -432,6 +430,7 @@ def redirect_response(page, doctype=None, docname=None):
 	frappe.local.response["type"] = "redirect"
 	frappe.local.response["location"] = get_url(url)
 
+
 # Check payment status daily and update the status
 def check_payment_status():
 	payment_requests = frappe.get_all(
@@ -457,6 +456,7 @@ def check_payment_status():
 				title="check_payment_status",
 				message=f"Error calling get_payment_status for {pr.name}: {frappe.get_traceback()}",
 			)
+
 
 # Check payment status in Payment Request
 @frappe.whitelist()
@@ -484,7 +484,7 @@ def get_payment_status(payment_request):
 		)
 
 		access_code = bankmuscat_settings.get_password("access_code")
-		
+
 		payload = {
 			"enc_request": encrypted_data,
 			"access_code": access_code,
@@ -495,7 +495,7 @@ def get_payment_status(payment_request):
 		}
 
 		SMARTPAY_URL = f"{bankmuscat_settings.base_url}/apis/servlet/DoWebTrans?"
-		
+
 		# Make request to SmartPay
 		response = requests.post(SMARTPAY_URL, data=payload)
 		parsed_response = dict(parse_qsl(response.text))
@@ -517,31 +517,25 @@ def get_payment_status(payment_request):
 		)
 		return {"status": "error", "message": frappe.get_traceback()}
 
+
 def check_url_usage_status(id):
 	try:
 		from frappe.utils import now_datetime
+
 		integration_request = frappe.db.get_value(
-			"Integration Request",
-			id,
-			["status", "url_access_time"],
-			as_dict=True
+			"Integration Request", id, ["status", "url_access_time"], as_dict=True
 		)
 
 		status = integration_request.status
 		last_access_time = integration_request.url_access_time
 
 		if status != "Completed" and not last_access_time:
-			frappe.db.set_value(
-				"Integration Request",
-				id,
-				"url_access_time",
-				now_datetime()
-			)
+			frappe.db.set_value("Integration Request", id, "url_access_time", now_datetime())
 			return False, None, None
 
 		elif status != "Completed" and last_access_time:
-
 			from datetime import datetime
+
 			if isinstance(last_access_time, str):
 				last_access_time = datetime.fromisoformat(last_access_time)
 
@@ -560,52 +554,36 @@ def check_url_usage_status(id):
 			return False, None, None
 
 		elif status == "Completed":
-			message = (
-				"This payment has already been completed successfully. No further action is required."
-			)
+			message = "This payment has already been completed successfully. No further action is required."
 			return True, None, "completed"
 
-	except Exception as e:
-		frappe.log_error(
-			title="BankMuscat URL Access Check Failed",
-			message=frappe.get_traceback()
+	except Exception:
+		frappe.log_error(title="BankMuscat URL Access Check Failed", message=frappe.get_traceback())
+		return (
+			True,
+			"Oops! Something didn’t work as expected. Please contact our Al Farsi service team for help.",
+			"pending",
 		)
-		return True, "Oops! Something didn’t work as expected. Please contact our Al Farsi service team for help.", "pending"
+
 
 @frappe.whitelist()
-def set_payment_entry(doc_name):
-
-	exist_doc = frappe.db.get_value(
-		"Payment Entry",
-		{ "reference_no": doc_name },
-		"name"
-	)
+def set_payment_entry(doc_name: str):
+	exist_doc = frappe.db.get_value("Payment Entry", {"reference_no": doc_name}, "name")
 
 	if exist_doc:
-		frappe.db.set_value(
-			"Payment Request",
-			doc_name,
-			"payment_entry",
-			exist_doc
-		)
+		frappe.db.set_value("Payment Request", doc_name, "payment_entry", exist_doc)
 
 	return True
+
 
 @frappe.whitelist()
 def check_roles():
 	roles = frappe.get_all(
-		"DocPerm",
-		filters={
-			"parent": "Payment Entry",
-			"permlevel": 0,
-			"create": 1
-		},
-		fields=["role"]
+		"DocPerm", filters={"parent": "Payment Entry", "permlevel": 0, "create": 1}, fields=["role"]
 	)
-	
+
 	user_roles = frappe.get_roles(frappe.session.user)
-	
+
 	has_permission = any(r["role"] in user_roles for r in roles)
 
 	return has_permission
-

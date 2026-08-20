@@ -200,15 +200,15 @@ def make_custom_fields():
 						"fieldtype": "Data",
 						"label": "Transaction status",
 						"insert_after": "party_account_currency",
-						"read_only": 1
+						"read_only": 1,
 					},
 					{
 						"fieldname": "payment_entry",
 						"fieldtype": "Data",
 						"label": "Payment Entry",
 						"insert_after": "bank_reference_no",
-						"read_only": 1	
-					}
+						"read_only": 1,
+					},
 				]
 			}
 		)
@@ -295,6 +295,7 @@ def delete_custom_fields():
 		)
 
 		frappe.clear_cache(doctype="Integration Request")
+
 
 def before_install():
 	# TODO: remove this

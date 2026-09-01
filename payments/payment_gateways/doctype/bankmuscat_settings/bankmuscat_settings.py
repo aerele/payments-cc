@@ -1,16 +1,18 @@
-import frappe
 import json
-from frappe import _
 from string import Template
-from Crypto.Cipher import AES
-from frappe.model.document import Document
-from payments.utils import create_payment_gateway
-from frappe.utils import call_hook_method, get_url
-from frappe.integrations.utils import create_request_log
 from urllib.parse import parse_qsl
 
-class BankMuscatSettings(Document):
+import frappe
+from Crypto.Cipher import AES
+from frappe import _
+from frappe.integrations.utils import create_request_log
+from frappe.model.document import Document
+from frappe.utils import call_hook_method, get_url
 
+from payments.utils import create_payment_gateway
+
+
+class BankMuscatSettings(Document):
 	supported_currencies = ("OMR", "AED", "USD", "GBP", "EUR", "INR")
 
 	# Validate and create a Payment Gateway entry automatically when BankMuscat Settings is saved
@@ -35,7 +37,7 @@ class BankMuscatSettings(Document):
 			error_trace = frappe.get_traceback()
 			frappe.log_error(
 				message=error_trace,
-				title=f"BankMuscat Payment Gateway Creation Failed (Merchant: {self.merchant_id or 'Unknown'})"
+				title=f"BankMuscat Payment Gateway Creation Failed (Merchant: {self.merchant_id or 'Unknown'})",
 			)
 
 			frappe.throw(
@@ -51,15 +53,19 @@ class BankMuscatSettings(Document):
 			if not kwargs or not isinstance(kwargs, dict):
 				frappe.throw("Missing or invalid parameters for BankMuscat payment request.")
 
-			required_fields = ["amount", "reference_doctype", "reference_docname", "currency", "payment_gateway"]
+			required_fields = [
+				"amount",
+				"reference_doctype",
+				"reference_docname",
+				"currency",
+				"payment_gateway",
+			]
 			missing_fields = [field for field in required_fields if field not in kwargs or not kwargs[field]]
 			if missing_fields:
 				frappe.throw(f"Missing required fields: {', '.join(missing_fields)}")
 
 			self.order_id = create_request_log(
-				data=kwargs,
-				service_name="BankMuscat",
-				name=kwargs.get("order_id", "")
+				data=kwargs, service_name="BankMuscat", name=kwargs.get("order_id", "")
 			).name
 
 			return get_url(f"bankmuscat_checkout?order_id={self.order_id}")
@@ -68,12 +74,7 @@ class BankMuscatSettings(Document):
 			frappe.log_error(error_message, "BankMuscat get_payment_url Failed")
 			if getattr(self, "order_id", None):
 				order_name = getattr(self.order_id, "name", self.order_id)
-				frappe.db.set_value(
-					"Integration Request",
-					order_name,
-					"error",
-					error_message[:1000]
-				)
+				frappe.db.set_value("Integration Request", order_name, "error", error_message[:1000])
 			frappe.throw("Unable to generate payment URL. Please check the Error Log.")
 
 	def decrypt(self, cipher_text, working_key):
@@ -94,7 +95,7 @@ class BankMuscatSettings(Document):
 			return encrypted_hex
 		except Exception:
 			frappe.log_error(frappe.get_traceback(), "BankMuscat Encryption Failed")
-			frappe.throw(_("Unable to encrypt request for BankMuscat. Please check the Error Log."))	
+			frappe.throw(_("Unable to encrypt request for BankMuscat. Please check the Error Log."))
 
 	# Prepare and return the merchant data string required by BankMuscat gateway.
 	def get_merchant_data(self, **kwargs):
@@ -130,20 +131,36 @@ class BankMuscatSettings(Document):
 			# add optional fields
 			optional_fields = [
 				"language",
-				"billing_name","billing_address","billing_city","billing_state",
-				"billing_zip","billing_country","billing_tel","billing_email",
-				"delivery_name","delivery_address","delivery_city","delivery_state",
-				"delivery_zip","delivery_country","delivery_tel",
-				"merchant_param1","merchant_param2","merchant_param3","merchant_param4","merchant_param5",
-				"promo_code","customer_identifier",
+				"billing_name",
+				"billing_address",
+				"billing_city",
+				"billing_state",
+				"billing_zip",
+				"billing_country",
+				"billing_tel",
+				"billing_email",
+				"delivery_name",
+				"delivery_address",
+				"delivery_city",
+				"delivery_state",
+				"delivery_zip",
+				"delivery_country",
+				"delivery_tel",
+				"merchant_param1",
+				"merchant_param2",
+				"merchant_param3",
+				"merchant_param4",
+				"merchant_param5",
+				"promo_code",
+				"customer_identifier",
 			]
 
 			merchant_data.update({field: kwargs.get(field, "") for field in optional_fields})
 
 			return "&".join(f"{key}={value}" for key, value in merchant_data.items())
-		except Exception as e:
+		except Exception:
 			frappe.log_error(frappe.get_traceback(), "BankMuscat: get_merchant_data Failed")
-			frappe.throw(_("Unable to prepare merchant data for BankMuscat. Please check the Error Log."))	
+			frappe.throw(_("Unable to prepare merchant data for BankMuscat. Please check the Error Log."))
 
 	# Validate that the provided currency is supported by BankMuscat.
 	def validate_transaction_currency(self, currency):
@@ -168,7 +185,7 @@ class BankMuscatSettings(Document):
 
 		order_id = kwargs.get("order_id") or getattr(self, "order_id", None)
 		if not order_id:
-			frappe.throw(_("Parameter 'order_id' is missing"))	
+			frappe.throw(_("Parameter 'order_id' is missing"))
 
 	# Generate the BankMuscat payment page URL and return an auto-submitting HTML form.
 	def get_payment_page_url(self, **kwargs):
@@ -184,10 +201,12 @@ class BankMuscatSettings(Document):
 
 			encrypted_req = self.encrypt(merchant_data, working_key)
 
-			frappe.logger().info(f"[BankMuscat] Encrypted request generated for Order ID: {kwargs.get('order_id')}")
+			frappe.logger().info(
+				f"[BankMuscat] Encrypted request generated for Order ID: {kwargs.get('order_id')}"
+			)
 
 			xscode = self.get_password("access_code")
-	
+
 			base_url = self.base_url
 
 			if not base_url:
@@ -206,18 +225,15 @@ class BankMuscatSettings(Document):
 					<script language="javascript">document.redirect.submit();</script>
 				</form>
 				"""
-				).safe_substitute(
-					encReq=encrypted_req, 
-					xscode=xscode, 
-					action_url=action_url
-				)
-				
+			).safe_substitute(encReq=encrypted_req, xscode=xscode, action_url=action_url)
+
 			return html
 		except Exception:
 			frappe.log_error(frappe.get_traceback(), "BankMuscat get_gateway_url Failed")
 			frappe.throw(
 				_("Unable to generate BankMuscat payment form. Please check the Error Log for details.")
-			)		
+			)
+
 
 # Gateway controller resolver
 def get_gateway_controller(doctype, docname, payment_gateway=None):

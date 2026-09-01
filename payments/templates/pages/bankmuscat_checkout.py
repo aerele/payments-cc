@@ -27,8 +27,11 @@ def check_already_payment_processed(request, reference_doctype, reference_docnam
 
 
 # Fetch and return the Bank Muscat payment URL for a valid Integration Request.
-@frappe.whitelist(allow_guest=True)
-def get_payment_url(data=None):
+# Guest access is required: the hosted payment page is opened by anonymous
+# shoppers from the storefront checkout; the method only reads the Integration
+# Request keyed by order_id and never mutates data.
+@frappe.whitelist(allow_guest=True)  # nosemgrep: guest-whitelisted-method
+def get_payment_url(data: dict | None = None):
 	try:
 		if isinstance(data, str):
 			data = frappe.parse_json(data or "{}")
@@ -94,7 +97,9 @@ def get_payment_url(data=None):
 			title="BankMuscat: Payment URL Generation Failed",
 			message=frappe.get_traceback(with_context=True),
 		)
-		frappe.throw(e.message)
+		if hasattr(e, "msg"):
+			frappe.throw(e.msg)
+		frappe.throw(str(e))
 
 
 # Route the UI page based on the response
@@ -562,7 +567,7 @@ def check_url_usage_status(id):
 
 
 @frappe.whitelist()
-def set_payment_entry(doc_name):
+def set_payment_entry(doc_name: str):
 	exist_doc = frappe.db.get_value("Payment Entry", {"reference_no": doc_name}, "name")
 
 	if exist_doc:
